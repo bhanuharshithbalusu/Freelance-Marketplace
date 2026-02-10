@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
 import TextArea from '@/components/ui/TextArea';
 import Button from '@/components/ui/Button';
 import api from '@/services/api';
@@ -25,11 +26,26 @@ export default function CreateProjectPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    category: '',
     minBudget: '',
     maxBudget: '',
     skills: '',
     deadline: ''
   });
+
+  const categories = [
+    { value: 'Web Development', label: 'Web Development' },
+    { value: 'Mobile Development', label: 'Mobile Development' },
+    { value: 'Design', label: 'Design' },
+    { value: 'Writing', label: 'Writing' },
+    { value: 'Marketing', label: 'Marketing' },
+    { value: 'Data Entry', label: 'Data Entry' },
+    { value: 'Video & Animation', label: 'Video & Animation' },
+    { value: 'Music & Audio', label: 'Music & Audio' },
+    { value: 'Programming', label: 'Programming' },
+    { value: 'Business', label: 'Business' },
+    { value: 'Other', label: 'Other' }
+  ];
 
   // Calculate min date (24 hours from now)
   const getMinDate = () => {
@@ -92,6 +108,11 @@ export default function CreateProjectPage() {
       }
     }
 
+    // Category validation
+    if (!formData.category) {
+      newErrors.category = 'Category is required';
+    }
+
     // Deadline validation
     if (!formData.deadline) {
       newErrors.deadline = 'Deadline is required';
@@ -130,18 +151,19 @@ export default function CreateProjectPage() {
       const projectData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
+        category: formData.category,
         budget: {
           min: parseFloat(formData.minBudget),
           max: parseFloat(formData.maxBudget)
         },
-        requiredSkills: formData.skills.split(',').map(s => s.trim()).filter(s => s),
+        skillsRequired: formData.skills.split(',').map(s => s.trim()).filter(s => s),
         biddingEndsAt: new Date(formData.deadline).toISOString()
       };
 
       console.log('📤 Creating project with data:', projectData);
       const response = await api.projects.create(projectData);
       console.log('✅ Project created:', response.data);
-      
+
       const projectId = response.data.data._id;
 
       // Redirect to project detail page
@@ -149,7 +171,7 @@ export default function CreateProjectPage() {
     } catch (err: any) {
       console.error('❌ Failed to create project:', err);
       console.error('❌ Error response:', err.response?.data);
-      
+
       // Handle validation errors
       if (err.response?.data?.errors) {
         const backendErrors: Record<string, string> = {};
@@ -206,6 +228,17 @@ export default function CreateProjectPage() {
               placeholder="Describe your project in detail. Include requirements, deliverables, and any specific preferences..."
               rows={8}
               maxLength={5000}
+              required
+            />
+
+            {/* Category */}
+            <Select
+              label="Category"
+              options={categories}
+              value={formData.category}
+              onChange={(value) => setFormData({ ...formData, category: value })}
+              error={errors.category}
+              placeholder="Select a category"
               required
             />
 
