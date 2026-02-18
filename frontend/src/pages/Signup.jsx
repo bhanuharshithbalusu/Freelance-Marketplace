@@ -150,7 +150,7 @@ const Signup = () => {
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     className="input-field !pl-11"
-                                    placeholder="John Doe"
+                                    placeholder="enter your name"
                                     required
                                     id="signup-name"
                                 />
